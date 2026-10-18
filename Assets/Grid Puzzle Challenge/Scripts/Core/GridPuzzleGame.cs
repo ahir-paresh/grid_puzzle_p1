@@ -392,6 +392,8 @@ namespace GridPuzzle.Core
             }
 
             // 2. Revert deltas in reverse
+            var survivingToRestore = new List<(GridTile Tile, TileDelta Delta)>();
+
             for (int i = record.Deltas.Count - 1; i >= 0; i--)
             {
                 var delta = record.Deltas[i];
@@ -413,7 +415,7 @@ namespace GridPuzzle.Core
                 }
                 else
                 {
-                    // Surviving tile: move back to OriginalPos and restore original attributes
+                    // Surviving tile: lift from FinalPos and queue for placement
                     var tile = Matrix.GetTile(delta.FinalPos);
                     if (tile != null && tile.Id == delta.TileId)
                     {
@@ -421,7 +423,7 @@ namespace GridPuzzle.Core
                         tile.Value = delta.OriginalValue;
                         tile.Type = delta.OriginalType;
                         tile.IceDurability = delta.OriginalDurability;
-                        Matrix.SetTile(delta.OriginalPos, tile);
+                        survivingToRestore.Add((tile, delta));
 
                         if (delta.OriginalPos != delta.FinalPos)
                         {
@@ -435,6 +437,12 @@ namespace GridPuzzle.Core
                         }
                     }
                 }
+            }
+
+            // Pass 2: Place all surviving tiles back to their OriginalPos (safely avoiding destination collision)
+            foreach (var (tile, delta) in survivingToRestore)
+            {
+                Matrix.SetTile(delta.OriginalPos, tile);
             }
 
             // 3. Restore metrics
@@ -480,8 +488,101 @@ namespace GridPuzzle.Core
 
             blastedTile = Matrix.RemoveTile(pos);
 
+            // Record in history for deterministic Undo
+            var record = (History is DeltaStateHistory deltaHist) ? deltaHist.ObtainRecord() : new TransitionRecord();
+            record.MoveIndex = MovesMade;
+            record.ScoreBefore = Score;
+            record.StepsRemainingBefore = StepsRemaining;
+            record.ComboCountBefore = ComboCount;
+            record.ComboMultiplierBefore = ComboMultiplier;
+
+            record.Deltas.Add(new TileDelta
+            {
+                TileId = blastedTile.Id,
+                OriginalPos = pos,
+                FinalPos = pos,
+                OriginalValue = blastedTile.Value,
+                FinalValue = blastedTile.Value,
+                OriginalType = blastedTile.Type,
+                OriginalDurability = blastedTile.IceDurability,
+                WasMergedAndRemoved = true
+            });
+
+            History.Record(record);
+
             // Record as power-up move
             Score += 25;
+            NotifyMetricsChanged();
+            return true;
+        }
+
+        /// <summary>
+        /// Tactical power-up: Swaps two grid tiles or moves a tile into an empty slot.
+        /// </summary>
+        public bool TrySwapTiles(GridPosition fromPos, GridPosition toPos, out SwapResult result)
+        {
+            result = default;
+            if (State != GameState.Playing) return false;
+            if (!Matrix.InBounds(fromPos) || !Matrix.InBounds(toPos)) return false;
+            if (fromPos == toPos) return false;
+
+            var tileA = Matrix.GetTile(fromPos);
+            if (tileA == null) return false;
+
+            var tileB = Matrix.GetTile(toPos);
+
+            // Cannot swap immovable stone obstacles
+            if (tileA.Type == TileType.Stone || (tileB != null && tileB.Type == TileType.Stone))
+                return false;
+
+            // Swap in matrix
+            Matrix.SetTile(fromPos, tileB);
+            Matrix.SetTile(toPos, tileA);
+
+            result = new SwapResult
+            {
+                From = fromPos,
+                To = toPos,
+                TileAId = tileA.Id,
+                TileBId = tileB?.Id
+            };
+
+            // Record in history for deterministic Undo
+            var record = (History is DeltaStateHistory deltaHist) ? deltaHist.ObtainRecord() : new TransitionRecord();
+            record.MoveIndex = MovesMade;
+            record.ScoreBefore = Score;
+            record.StepsRemainingBefore = StepsRemaining;
+            record.ComboCountBefore = ComboCount;
+            record.ComboMultiplierBefore = ComboMultiplier;
+
+            record.Deltas.Add(new TileDelta
+            {
+                TileId = tileA.Id,
+                OriginalPos = fromPos,
+                FinalPos = toPos,
+                OriginalValue = tileA.Value,
+                FinalValue = tileA.Value,
+                OriginalType = tileA.Type,
+                OriginalDurability = tileA.IceDurability,
+                WasMergedAndRemoved = false
+            });
+
+            if (tileB != null)
+            {
+                record.Deltas.Add(new TileDelta
+                {
+                    TileId = tileB.Id,
+                    OriginalPos = toPos,
+                    FinalPos = fromPos,
+                    OriginalValue = tileB.Value,
+                    FinalValue = tileB.Value,
+                    OriginalType = tileB.Type,
+                    OriginalDurability = tileB.IceDurability,
+                    WasMergedAndRemoved = false
+                });
+            }
+
+            History.Record(record);
             NotifyMetricsChanged();
             return true;
         }

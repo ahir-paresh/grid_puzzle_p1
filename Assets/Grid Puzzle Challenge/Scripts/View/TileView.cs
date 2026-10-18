@@ -4,6 +4,7 @@ using GridPuzzle.Config;
 using GridPuzzle.Core;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace GridPuzzle.View
@@ -11,9 +12,9 @@ namespace GridPuzzle.View
     /// <summary>
     /// Visual representation of an active puzzle tile on the board.
     /// Manages smooth sliding interpolation, scale pop-ins, merge bumps,
-    /// obstacle visual styling (ice, stone), and procedural typography.
+    /// obstacle visual styling (ice, stone), interactive targeting selection, and procedural typography.
     /// </summary>
-    public class TileView : MonoBehaviour
+    public class TileView : MonoBehaviour, IPointerClickHandler
     {
         [Header("Components")]
         [SerializeField] private Image backgroundGraphic;
@@ -24,10 +25,14 @@ namespace GridPuzzle.View
         public int TileId { get; private set; }
         public int CurrentValue { get; private set; }
         public TileType CurrentType { get; private set; }
+        public GridPosition CurrentPosition { get; set; }
+
+        public event Action<TileView> OnTileClicked;
 
         private Coroutine _activeAnimationCoroutine;
         private GridPuzzleConfig _config;
         private Vector3 _targetLocalPosition;
+        private Outline _selectionOutline;
 
         public void Initialize(int id, int value, TileType type, int durability, GridPuzzleConfig config)
         {
@@ -37,8 +42,35 @@ namespace GridPuzzle.View
             _config = config;
             _targetLocalPosition = transform.localPosition;
 
+            SetSelected(false);
             UpdateVisualState(value, type, durability);
             transform.localScale = Vector3.one;
+        }
+
+        public void SetSelected(bool isSelected)
+        {
+            if (_selectionOutline == null)
+            {
+                _selectionOutline = GetComponent<Outline>();
+                if (_selectionOutline == null && isSelected)
+                {
+                    _selectionOutline = gameObject.AddComponent<Outline>();
+                }
+            }
+
+            if (_selectionOutline != null)
+            {
+                _selectionOutline.enabled = isSelected;
+                _selectionOutline.effectColor = new Color(1f, 0.85f, 0.15f, 1f); // Vibrant gold
+                _selectionOutline.effectDistance = new Vector2(4f, -4f);
+            }
+
+            transform.localScale = isSelected ? new Vector3(1.10f, 1.10f, 1f) : Vector3.one;
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            OnTileClicked?.Invoke(this);
         }
 
         public void SnapToPosition(Vector3 position)
