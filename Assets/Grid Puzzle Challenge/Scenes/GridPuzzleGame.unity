@@ -741,6 +741,7 @@ MonoBehaviour:
   uiManager: {fileID: 1860011526}
   swipeInput: {fileID: 1982919253}
   audioManager: {fileID: 1423863710}
+  hapticManager: {fileID: 0}
   config: {fileID: 11400000, guid: c3333333333333333333333333333333, type: 2}
   bombCharges: 2
   shuffleCharges: 2
@@ -772,7 +773,7 @@ GameObject:
   - component: {fileID: 531412362}
   - component: {fileID: 531412361}
   m_Layer: 0
-  m_Name: SwapButton
+  m_Name: ShuffleButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -938,7 +939,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "⇄ SWAP"
+  m_text: "\U0001F500 SHUFFLE"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

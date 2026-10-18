@@ -1,5 +1,6 @@
 ﻿<Solution>
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="GridPuzzle.csproj" />
+  <Project Path="MOST_HapticFeedback.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
 </Solution>
