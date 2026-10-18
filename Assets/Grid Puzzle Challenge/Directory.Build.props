@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <ArtifactsDir>$(MSBuildThisFileDirectory)../../Temp/DotnetBuild</ArtifactsDir>
+    <BaseIntermediateOutputPath>$(ArtifactsDir)/obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(ArtifactsDir)/obj/$(MSBuildProjectName)/</IntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(ArtifactsDir)/obj/$(MSBuildProjectName)/</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(ArtifactsDir)/bin/$(MSBuildProjectName)/</BaseOutputPath>
+    <OutputPath>$(ArtifactsDir)/bin/$(MSBuildProjectName)/</OutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+</Project>
