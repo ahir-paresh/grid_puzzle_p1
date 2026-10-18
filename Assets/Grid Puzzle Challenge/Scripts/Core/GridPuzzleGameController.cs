@@ -27,6 +27,16 @@ namespace GridPuzzle.Core
         [SerializeField] private int bombCharges = 2;
         [SerializeField] private int shuffleCharges = 2;
 
+        private enum ActivePowerUpMode
+        {
+            None,
+            Bomb,
+            Swap
+        }
+
+        private ActivePowerUpMode _currentPowerUpMode = ActivePowerUpMode.None;
+        private GridPosition? _selectedSwapTilePos = null;
+
         public GridPuzzleGame GameLogic { get; private set; }
 
         private void Start()
@@ -72,6 +82,7 @@ namespace GridPuzzle.Core
             if (boardView != null)
             {
                 boardView.Initialize(config, rows, cols);
+                boardView.OnCellClicked += HandleCellClicked;
             }
 
             RestartGame();
@@ -92,6 +103,11 @@ namespace GridPuzzle.Core
                 uiManager.OnRestartClicked -= RestartGame;
             }
 
+            if (boardView != null)
+            {
+                boardView.OnCellClicked -= HandleCellClicked;
+            }
+
             if (GameLogic != null)
             {
                 GameLogic.OnMetricsChanged -= HandleMetricsChanged;
@@ -102,6 +118,10 @@ namespace GridPuzzle.Core
 
         public void RestartGame()
         {
+            bombCharges = 2;
+            shuffleCharges = 2;
+            CancelActivePowerUp();
+
             if (swipeInput != null) swipeInput.IsInputBlocked = false;
 
             int startingTiles = config != null ? config.startingTileCount : 2;
@@ -118,6 +138,7 @@ namespace GridPuzzle.Core
             if (uiManager != null)
             {
                 uiManager.UpdateMetrics(GameLogic.GetMetrics());
+                uiManager.UpdatePowerUpCounts(bombCharges, shuffleCharges);
                 uiManager.HideAllModals();
             }
         }
@@ -126,6 +147,8 @@ namespace GridPuzzle.Core
         {
             if (GameLogic == null || GameLogic.State != GameState.Playing)
                 return;
+
+            CancelActivePowerUp();
 
             // Block input while animating move sequence
             if (swipeInput != null) swipeInput.IsInputBlocked = true;
@@ -188,6 +211,8 @@ namespace GridPuzzle.Core
         {
             if (GameLogic == null || !GameLogic.History.CanUndo) return;
 
+            CancelActivePowerUp();
+
             if (swipeInput != null) swipeInput.IsInputBlocked = true;
             if (audioManager != null) audioManager.PlayButtonClick();
 
@@ -200,6 +225,11 @@ namespace GridPuzzle.Core
                     if (GameLogic != null)
                     {
                         boardView.SyncPositionsWithMatrix(GameLogic.Matrix.GetAllOccupied());
+                    }
+
+                    if (uiManager != null)
+                    {
+                        uiManager.UpdatePowerUpCounts(bombCharges, shuffleCharges);
                     }
 
                     if (swipeInput != null && GameLogic.State == GameState.Playing)
@@ -218,39 +248,147 @@ namespace GridPuzzle.Core
         {
             if (bombCharges <= 0 || GameLogic == null || GameLogic.State != GameState.Playing) return;
 
-            // Target first obstacle or highest tile
-            var occupied = GameLogic.Matrix.GetAllOccupied();
-            var target = occupied.FirstOrDefault(t => t.Tile.Type == TileType.Ice).Tile
-                         ?? occupied.FirstOrDefault(t => t.Tile.Type == TileType.Stone).Tile
-                         ?? occupied.OrderByDescending(t => t.Tile.Value).FirstOrDefault().Tile;
-
-            if (target != null)
+            if (_currentPowerUpMode == ActivePowerUpMode.Bomb)
             {
-                var targetPos = occupied.First(t => t.Tile.Id == target.Id).Pos;
-                if (GameLogic.TryUseBomb(targetPos, out _))
-                {
-                    bombCharges--;
-                    if (audioManager != null) audioManager.PlayPowerUp();
-                    if (boardView != null)
-                    {
-                        boardView.RenderInitialTiles(GameLogic.Matrix.GetAllOccupied());
-                    }
-                }
+                CancelActivePowerUp();
+                return;
             }
+
+            CancelActivePowerUp();
+            _currentPowerUpMode = ActivePowerUpMode.Bomb;
+
+            if (uiManager != null) uiManager.SetBombSelected(true);
+            if (swipeInput != null) swipeInput.IsInputBlocked = true;
+            if (audioManager != null) audioManager.PlayButtonClick();
         }
 
         private void HandleShuffleClicked()
         {
             if (shuffleCharges <= 0 || GameLogic == null || GameLogic.State != GameState.Playing) return;
 
-            if (GameLogic.TryUseShuffle())
+            if (_currentPowerUpMode == ActivePowerUpMode.Swap)
             {
-                shuffleCharges--;
-                if (audioManager != null) audioManager.PlayPowerUp();
-                if (boardView != null)
+                CancelActivePowerUp();
+                return;
+            }
+
+            CancelActivePowerUp();
+            _currentPowerUpMode = ActivePowerUpMode.Swap;
+
+            if (uiManager != null) uiManager.SetSwapSelected(true);
+            if (swipeInput != null) swipeInput.IsInputBlocked = true;
+            if (audioManager != null) audioManager.PlayButtonClick();
+        }
+
+        private void HandleCellClicked(GridPosition clickedPos)
+        {
+            if (GameLogic == null || GameLogic.State != GameState.Playing) return;
+
+            if (_currentPowerUpMode == ActivePowerUpMode.Bomb)
+            {
+                var targetTile = GameLogic.Matrix.GetTile(clickedPos);
+                if (targetTile == null) return; // Ignore clicks on empty slots; must click an active tile/obstacle
+
+                if (GameLogic.TryUseBomb(clickedPos, out var blastedTile))
                 {
-                    boardView.RenderInitialTiles(GameLogic.Matrix.GetAllOccupied());
+                    bombCharges--;
+                    if (audioManager != null) audioManager.PlayPowerUp();
+                    if (uiManager != null) uiManager.UpdatePowerUpCounts(bombCharges, shuffleCharges);
+
+                    CancelActivePowerUp();
+
+                    if (boardView != null)
+                    {
+                        if (swipeInput != null) swipeInput.IsInputBlocked = true;
+                        boardView.AnimateTileDestruction(blastedTile, () =>
+                        {
+                            if (GameLogic != null && boardView != null)
+                            {
+                                boardView.SyncPositionsWithMatrix(GameLogic.Matrix.GetAllOccupied());
+                            }
+                            if (swipeInput != null && GameLogic.State == GameState.Playing)
+                            {
+                                swipeInput.IsInputBlocked = false;
+                            }
+                        });
+                    }
                 }
+            }
+            else if (_currentPowerUpMode == ActivePowerUpMode.Swap)
+            {
+                if (!_selectedSwapTilePos.HasValue)
+                {
+                    // Phase 1: Select first tile to swap
+                    var tile = GameLogic.Matrix.GetTile(clickedPos);
+                    if (tile == null || tile.Type == TileType.Stone) return; // Stone obstacles cannot be moved
+
+                    _selectedSwapTilePos = clickedPos;
+                    if (boardView != null) boardView.SetTileSelected(clickedPos, true);
+                    if (audioManager != null) audioManager.PlayButtonClick();
+                }
+                else
+                {
+                    // Phase 2: Select destination (another tile or empty slot)
+                    GridPosition firstPos = _selectedSwapTilePos.Value;
+
+                    if (clickedPos == firstPos)
+                    {
+                        // Clicking the same tile deselects it
+                        if (boardView != null) boardView.SetTileSelected(firstPos, false);
+                        _selectedSwapTilePos = null;
+                        if (audioManager != null) audioManager.PlayButtonClick();
+                        return;
+                    }
+
+                    if (GameLogic.TrySwapTiles(firstPos, clickedPos, out var swapResult))
+                    {
+                        shuffleCharges--;
+                        if (boardView != null) boardView.SetTileSelected(firstPos, false);
+                        _selectedSwapTilePos = null;
+
+                        if (audioManager != null) audioManager.PlayPowerUp();
+                        if (uiManager != null) uiManager.UpdatePowerUpCounts(bombCharges, shuffleCharges);
+
+                        CancelActivePowerUp();
+
+                        if (boardView != null)
+                        {
+                            if (swipeInput != null) swipeInput.IsInputBlocked = true;
+                            boardView.AnimateSwap(firstPos, clickedPos, swapResult, () =>
+                            {
+                                if (GameLogic != null && boardView != null)
+                                {
+                                    boardView.SyncPositionsWithMatrix(GameLogic.Matrix.GetAllOccupied());
+                                }
+                                if (swipeInput != null && GameLogic.State == GameState.Playing)
+                                {
+                                    swipeInput.IsInputBlocked = false;
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CancelActivePowerUp()
+        {
+            if (_selectedSwapTilePos.HasValue && boardView != null)
+            {
+                boardView.SetTileSelected(_selectedSwapTilePos.Value, false);
+            }
+            _selectedSwapTilePos = null;
+            _currentPowerUpMode = ActivePowerUpMode.None;
+
+            if (uiManager != null)
+            {
+                uiManager.SetBombSelected(false);
+                uiManager.SetSwapSelected(false);
+            }
+
+            if (swipeInput != null && GameLogic != null && GameLogic.State == GameState.Playing)
+            {
+                swipeInput.IsInputBlocked = false;
             }
         }
 

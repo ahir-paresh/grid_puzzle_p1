@@ -68,4 +68,16 @@ namespace GridPuzzle.Core
             MergesCount = 0;
         }
     }
+
+    /// <summary>
+    /// Encapsulates the logical outcome of a targeted tile swap power-up.
+    /// </summary>
+    public struct SwapResult
+    {
+        public GridPosition From { get; set; }
+        public GridPosition To { get; set; }
+        public int TileAId { get; set; }
+        public int? TileBId { get; set; }
+    }
 }
+

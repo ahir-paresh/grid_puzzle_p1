@@ -60,11 +60,92 @@ namespace GridPuzzle.UI
         private Coroutine _comboBannerCoroutine;
         private Coroutine _stepPulseCoroutine;
         private int _displayedScore = 0;
+        private Outline _bombOutline;
+        private Outline _shuffleOutline;
+        private Color _bombOriginalColor = new Color(0.22f, 0.26f, 0.35f, 1f);
+        private Color _shuffleOriginalColor = new Color(0.22f, 0.26f, 0.35f, 1f);
 
         private void Awake()
         {
+            if (bombButton != null && bombButton.TryGetComponent<Image>(out var bImg)) _bombOriginalColor = bImg.color;
+            if (shuffleButton != null && shuffleButton.TryGetComponent<Image>(out var sImg)) _shuffleOriginalColor = sImg.color;
+
+            if (shuffleButton != null)
+            {
+                var txt = shuffleButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null && txt.text.Contains("SHUFFLE"))
+                {
+                    txt.text = "⇄ SWAP";
+                }
+            }
+
             BindButtons();
             HideAllModals();
+        }
+
+        public void SetBombSelected(bool isSelected)
+        {
+            if (bombButton == null) return;
+            var img = bombButton.GetComponent<Image>();
+            if (img != null)
+            {
+                img.color = isSelected ? new Color(0.92f, 0.35f, 0.2f, 1f) : _bombOriginalColor;
+            }
+
+            if (_bombOutline == null)
+            {
+                _bombOutline = bombButton.GetComponent<Outline>();
+                if (_bombOutline == null && isSelected)
+                {
+                    _bombOutline = bombButton.gameObject.AddComponent<Outline>();
+                }
+            }
+
+            if (_bombOutline != null)
+            {
+                _bombOutline.enabled = isSelected;
+                _bombOutline.effectColor = new Color(1f, 0.85f, 0.2f, 1f);
+                _bombOutline.effectDistance = new Vector2(3f, -3f);
+            }
+
+            bombButton.transform.localScale = isSelected ? new Vector3(1.08f, 1.08f, 1f) : Vector3.one;
+        }
+
+        public void SetSwapSelected(bool isSelected)
+        {
+            if (shuffleButton == null) return;
+            var img = shuffleButton.GetComponent<Image>();
+            if (img != null)
+            {
+                img.color = isSelected ? new Color(0.25f, 0.65f, 0.90f, 1f) : _shuffleOriginalColor;
+            }
+
+            if (_shuffleOutline == null)
+            {
+                _shuffleOutline = shuffleButton.GetComponent<Outline>();
+                if (_shuffleOutline == null && isSelected)
+                {
+                    _shuffleOutline = shuffleButton.gameObject.AddComponent<Outline>();
+                }
+            }
+
+            if (_shuffleOutline != null)
+            {
+                _shuffleOutline.enabled = isSelected;
+                _shuffleOutline.effectColor = new Color(1f, 0.85f, 0.2f, 1f);
+                _shuffleOutline.effectDistance = new Vector2(3f, -3f);
+            }
+
+            shuffleButton.transform.localScale = isSelected ? new Vector3(1.08f, 1.08f, 1f) : Vector3.one;
+        }
+
+        public void UpdatePowerUpCounts(int bombs, int swaps)
+        {
+            if (bombCountText != null) bombCountText.text = bombs.ToString();
+            if (shuffleCountText != null) shuffleCountText.text = swaps.ToString();
+
+            if (bombButton != null) bombButton.interactable = bombs > 0;
+            if (shuffleButton != null) shuffleButton.interactable = swaps > 0;
         }
 
         private void BindButtons()

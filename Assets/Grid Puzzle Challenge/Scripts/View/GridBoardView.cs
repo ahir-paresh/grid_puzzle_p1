@@ -34,6 +34,8 @@ namespace GridPuzzle.View
         private readonly Dictionary<int, TileView> _activeTiles = new Dictionary<int, TileView>();
         private readonly List<GameObject> _slotInstances = new List<GameObject>();
 
+        public event Action<GridPosition> OnCellClicked;
+
         public void Initialize(GridPuzzleConfig config, int rows, int columns)
         {
             _config = config;
@@ -102,6 +104,10 @@ namespace GridPuzzle.View
                     rt.sizeDelta = new Vector2(_cellSize, _cellSize);
                     rt.localPosition = GetLocalPosition(pos);
 
+                    var slotView = slotGo.GetComponent<BoardSlotView>();
+                    if (slotView == null) slotView = slotGo.AddComponent<BoardSlotView>();
+                    slotView.Initialize(pos, p => OnCellClicked?.Invoke(p));
+
                     _slotInstances.Add(slotGo);
                 }
             }
@@ -113,6 +119,7 @@ namespace GridPuzzle.View
             go.transform.SetParent(parent, false);
             var img = go.GetComponent<Image>();
             img.color = _config != null ? _config.cellSlotColor : new Color(0.2f, 0.22f, 0.28f, 1f);
+            img.raycastTarget = true;
             return go;
         }
 
@@ -136,8 +143,13 @@ namespace GridPuzzle.View
             Vector2 localPos = GetLocalPosition(pos);
             rt.localPosition = localPos;
 
+            view.CurrentPosition = pos;
             view.Initialize(tile.Id, tile.Value, tile.Type, tile.IceDurability, _config);
             view.SnapToPosition(localPos);
+
+            view.OnTileClicked -= HandleTileClicked;
+            view.OnTileClicked += HandleTileClicked;
+
             _activeTiles[tile.Id] = view;
 
             if (playPop)
@@ -146,6 +158,34 @@ namespace GridPuzzle.View
             }
 
             return view;
+        }
+
+        private void HandleTileClicked(TileView view)
+        {
+            if (view != null)
+            {
+                OnCellClicked?.Invoke(view.CurrentPosition);
+            }
+        }
+
+        public void SetTileSelected(GridPosition pos, bool isSelected)
+        {
+            foreach (var view in _activeTiles.Values)
+            {
+                if (view != null && view.CurrentPosition == pos)
+                {
+                    view.SetSelected(isSelected);
+                    break;
+                }
+            }
+        }
+
+        public void ClearAllTileSelections()
+        {
+            foreach (var view in _activeTiles.Values)
+            {
+                if (view != null) view.SetSelected(false);
+            }
         }
 
         public void AnimateMoveSequence(MoveResult moveResult, Action onSequenceComplete)
@@ -166,6 +206,7 @@ namespace GridPuzzle.View
                 if (_activeTiles.TryGetValue(motion.TileId, out var tileView))
                 {
                     Vector2 targetPos = GetLocalPosition(motion.To);
+                    tileView.CurrentPosition = motion.To;
                     tileView.AnimateSlideTo(targetPos, slideDuration);
 
                     if (motion.IsMerge)
@@ -184,6 +225,8 @@ namespace GridPuzzle.View
                 // Despawn sliding tile that got absorbed
                 if (_activeTiles.TryGetValue(merge.TileId, out var absorbedView))
                 {
+                    absorbedView.OnTileClicked -= HandleTileClicked;
+                    absorbedView.SetSelected(false);
                     tilePool.Despawn(absorbedView);
                     _activeTiles.Remove(merge.TileId);
                 }
@@ -255,6 +298,8 @@ namespace GridPuzzle.View
             {
                 if (_activeTiles.TryGetValue(tileId, out var view))
                 {
+                    view.OnTileClicked -= HandleTileClicked;
+                    view.SetSelected(false);
                     tilePool.Despawn(view);
                     _activeTiles.Remove(tileId);
                 }
@@ -275,6 +320,7 @@ namespace GridPuzzle.View
                 if (_activeTiles.TryGetValue(motion.TileId, out var view))
                 {
                     Vector2 targetPos = GetLocalPosition(motion.To);
+                    view.CurrentPosition = motion.To;
                     view.UpdateVisualState(motion.PromotedValue, view.CurrentType, 0);
                     view.AnimateSlideTo(targetPos, duration);
                 }
@@ -282,6 +328,72 @@ namespace GridPuzzle.View
 
             yield return new WaitForSeconds(duration);
             onSequenceComplete?.Invoke();
+        }
+
+        public void AnimateTileDestruction(GridTile blastedTile, Action onComplete = null)
+        {
+            if (blastedTile == null)
+            {
+                onComplete?.Invoke();
+                return;
+            }
+
+            if (_activeTiles.TryGetValue(blastedTile.Id, out var view))
+            {
+                _activeTiles.Remove(blastedTile.Id);
+                view.OnTileClicked -= HandleTileClicked;
+                view.SetSelected(false);
+                view.AnimateShatter(0.25f, () =>
+                {
+                    tilePool.Despawn(view);
+                    onComplete?.Invoke();
+                });
+            }
+            else
+            {
+                onComplete?.Invoke();
+            }
+        }
+
+        public void AnimateSwap(GridPosition fromPos, GridPosition toPos, SwapResult result, Action onComplete)
+        {
+            StartCoroutine(SwapCoroutine(fromPos, toPos, result, onComplete));
+        }
+
+        private IEnumerator SwapCoroutine(GridPosition fromPos, GridPosition toPos, SwapResult result, Action onComplete)
+        {
+            float duration = _config != null ? _config.slideDuration : 0.18f;
+
+            TileView viewA = null;
+            TileView viewB = null;
+
+            _activeTiles.TryGetValue(result.TileAId, out viewA);
+            if (result.TileBId.HasValue)
+            {
+                _activeTiles.TryGetValue(result.TileBId.Value, out viewB);
+            }
+
+            if (viewA != null)
+            {
+                Vector2 targetA = GetLocalPosition(toPos);
+                viewA.CurrentPosition = toPos;
+                viewA.AnimateSlideTo(targetA, duration);
+            }
+
+            if (viewB != null)
+            {
+                Vector2 targetB = GetLocalPosition(fromPos);
+                viewB.CurrentPosition = fromPos;
+                viewB.AnimateSlideTo(targetB, duration);
+            }
+
+            yield return new WaitForSeconds(duration);
+
+            if (viewA != null) viewA.AnimateMergeBump(0.12f);
+            if (viewB != null) viewB.AnimateMergeBump(0.12f);
+
+            yield return new WaitForSeconds(0.12f);
+            onComplete?.Invoke();
         }
 
         public void SyncPositionsWithMatrix(IEnumerable<(GridPosition Pos, GridTile Tile)> matrixTiles)
@@ -293,6 +405,7 @@ namespace GridPuzzle.View
                 if (_activeTiles.TryGetValue(tile.Id, out var view))
                 {
                     Vector2 expectedPos = GetLocalPosition(pos);
+                    view.CurrentPosition = pos;
                     view.SnapToPosition(expectedPos);
                     view.UpdateVisualState(tile.Value, tile.Type, tile.IceDurability);
                 }
@@ -305,6 +418,8 @@ namespace GridPuzzle.View
             {
                 if (kvp.Value != null)
                 {
+                    kvp.Value.OnTileClicked -= HandleTileClicked;
+                    kvp.Value.SetSelected(false);
                     tilePool.Despawn(kvp.Value);
                 }
             }

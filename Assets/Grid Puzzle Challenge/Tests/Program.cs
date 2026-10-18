@@ -56,7 +56,10 @@ namespace GridPuzzle.Tests
                 ("Gameplay Hook: Synergistic Combo Multiplier Progression", Test_SynergisticCombos_Multipliers),
                 ("Step Budget: Rigid Step Framework & Game Over State", Test_StepBudget_GameOver),
                 ("Power-Ups: Bomb Destroys Tile & Obstacle", Test_PowerUp_Bomb),
-                ("Power-Ups: Grid Shuffle Permutation", Test_PowerUp_Shuffle)
+                ("Power-Ups: Grid Shuffle Permutation", Test_PowerUp_Shuffle),
+                ("Power-Ups: Targeted Bomb Destroys Tile & Reversible By Undo", Test_PowerUp_TargetedBomb_DestroysTileAndCanUndo),
+                ("Power-Ups: Targeted Swap Exchanges Two Tiles & Reversible By Undo", Test_PowerUp_TargetedSwap_SwapsTilesAndCanUndo),
+                ("Power-Ups: Targeted Swap Moves Tile To Empty Slot & Reversible By Undo", Test_PowerUp_TargetedSwap_MovesToEmptySlotAndCanUndo)
             };
 
             int passed = 0;
@@ -419,6 +422,84 @@ namespace GridPuzzle.Tests
                 if (item.Tile.Value == 8) found8 = true;
             }
             Assert.True(found2 && found8, "Values must be preserved during shuffle");
+        }
+
+        private static void Test_PowerUp_TargetedBomb_DestroysTileAndCanUndo()
+        {
+            var game = new GridPuzzleGame(4, 4, seed: 101);
+            game.Initialize(startingTileCount: 0);
+
+            var tile = GridTile.CreateNormal(42, 64);
+            game.Matrix.SetTile(new GridPosition(2, 3), tile);
+            int scoreBefore = game.Score;
+
+            // Bomb the specific tile at (2, 3)
+            bool bombed = game.TryUseBomb(new GridPosition(2, 3), out var destroyedTile);
+            Assert.True(bombed, "Bomb should succeed on occupied tile");
+            Assert.AreEqual(tile, destroyedTile);
+            Assert.True(game.Matrix.IsEmpty(new GridPosition(2, 3)), "Targeted cell must be empty after bomb");
+            Assert.AreEqual(scoreBefore + 25, game.Score, "Bomb should award power-up score");
+
+            // Undo the bomb
+            Assert.True(game.History.CanUndo, "Should be able to undo bomb");
+            bool undone = game.TryUndo(out var undoResult);
+            Assert.True(undone, "Undo operation must succeed");
+            Assert.AreEqual(scoreBefore, game.Score, "Score must be restored after undo");
+            var restored = game.Matrix.GetTile(new GridPosition(2, 3));
+            Assert.AreEqual(42, restored.Id);
+            Assert.AreEqual(64, restored.Value);
+        }
+
+        private static void Test_PowerUp_TargetedSwap_SwapsTilesAndCanUndo()
+        {
+            var game = new GridPuzzleGame(4, 4, seed: 202);
+            game.Initialize(startingTileCount: 0);
+
+            var tileA = GridTile.CreateNormal(10, 4);
+            var tileB = GridTile.CreateNormal(20, 16);
+            game.Matrix.SetTile(new GridPosition(0, 0), tileA);
+            game.Matrix.SetTile(new GridPosition(3, 3), tileB);
+
+            // Swap (0, 0) and (3, 3)
+            bool swapped = game.TrySwapTiles(new GridPosition(0, 0), new GridPosition(3, 3), out var result);
+            Assert.True(swapped, "Swap between two valid tiles should succeed");
+            Assert.AreEqual(tileA.Id, result.TileAId);
+            Assert.AreEqual(tileB.Id, result.TileBId.Value);
+
+            // Verify matrix after swap
+            Assert.AreEqual(tileB, game.Matrix.GetTile(0, 0), "(0, 0) should now contain Tile B");
+            Assert.AreEqual(tileA, game.Matrix.GetTile(3, 3), "(3, 3) should now contain Tile A");
+
+            // Undo swap
+            bool undone = game.TryUndo(out _);
+            Assert.True(undone, "Undo swap must succeed");
+            Assert.AreEqual(tileA, game.Matrix.GetTile(0, 0), "(0, 0) should be restored to Tile A");
+            Assert.AreEqual(tileB, game.Matrix.GetTile(3, 3), "(3, 3) should be restored to Tile B");
+        }
+
+        private static void Test_PowerUp_TargetedSwap_MovesToEmptySlotAndCanUndo()
+        {
+            var game = new GridPuzzleGame(4, 4, seed: 303);
+            game.Initialize(startingTileCount: 0);
+
+            var tileA = GridTile.CreateNormal(30, 128);
+            game.Matrix.SetTile(new GridPosition(1, 1), tileA);
+            Assert.True(game.Matrix.IsEmpty(new GridPosition(2, 2)), "(2, 2) must be empty");
+
+            // Swap (move) Tile A from (1, 1) into empty slot (2, 2)
+            bool moved = game.TrySwapTiles(new GridPosition(1, 1), new GridPosition(2, 2), out var result);
+            Assert.True(moved, "Moving tile to empty slot via swap should succeed");
+            Assert.AreEqual(tileA.Id, result.TileAId);
+            Assert.False(result.TileBId.HasValue, "TileB should be null for empty slot destination");
+
+            Assert.True(game.Matrix.IsEmpty(new GridPosition(1, 1)), "Original slot should now be empty");
+            Assert.AreEqual(tileA, game.Matrix.GetTile(2, 2), "Destination slot should now hold Tile A");
+
+            // Undo move
+            bool undone = game.TryUndo(out _);
+            Assert.True(undone, "Undo move must succeed");
+            Assert.AreEqual(tileA, game.Matrix.GetTile(1, 1), "Tile A must be restored to original slot (1, 1)");
+            Assert.True(game.Matrix.IsEmpty(new GridPosition(2, 2)), "Destination slot (2, 2) must be empty again");
         }
     }
 }
