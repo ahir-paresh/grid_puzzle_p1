@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using GridPuzzle.Core;
+using Solo.MOST_IN_ONE;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -153,14 +154,43 @@ namespace GridPuzzle.UI
             if (undoButton != null) undoButton.onClick.AddListener(() => OnUndoClicked?.Invoke());
             if (bombButton != null) bombButton.onClick.AddListener(() => OnBombClicked?.Invoke());
             if (shuffleButton != null) shuffleButton.onClick.AddListener(() => OnShuffleClicked?.Invoke());
-            if (restartButton != null) restartButton.onClick.AddListener(() => OnRestartClicked?.Invoke());
+            if (restartButton != null) restartButton.onClick.AddListener(() =>
+            {
+                TriggerButtonHaptic();
+                OnRestartClicked?.Invoke();
+            });
 
-            if (gameOverRetryButton != null) gameOverRetryButton.onClick.AddListener(() => OnRestartClicked?.Invoke());
-            if (gameOverUndoButton != null) gameOverUndoButton.onClick.AddListener(() => OnUndoClicked?.Invoke());
-            if (winNextButton != null) winNextButton.onClick.AddListener(() => OnRestartClicked?.Invoke());
+            if (gameOverRetryButton != null) gameOverRetryButton.onClick.AddListener(() =>
+            {
+                TriggerButtonHaptic();
+                OnRestartClicked?.Invoke();
+            });
+            if (gameOverUndoButton != null) gameOverUndoButton.onClick.AddListener(() =>
+            {
+                TriggerButtonHaptic();
+                OnUndoClicked?.Invoke();
+            });
+            if (winNextButton != null) winNextButton.onClick.AddListener(() =>
+            {
+                TriggerButtonHaptic();
+                OnRestartClicked?.Invoke();
+            });
 
-            if (infoButton != null) infoButton.onClick.AddListener(() => ShowInfoModal(true));
-            if (infoCloseButton != null) infoCloseButton.onClick.AddListener(() => ShowInfoModal(false));
+            if (infoButton != null) infoButton.onClick.AddListener(() =>
+            {
+                TriggerButtonHaptic();
+                ShowInfoModal(true);
+            });
+            if (infoCloseButton != null) infoCloseButton.onClick.AddListener(() =>
+            {
+                TriggerButtonHaptic();
+                ShowInfoModal(false);
+            });
+        }
+
+        private void TriggerButtonHaptic()
+        {
+            MOST_HapticFeedback.GenerateWithCooldown(MOST_HapticFeedback.HapticTypes.Selection, 0.05f);
         }
 
         public void UpdateMetrics(GameMetrics metrics)

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Linq;
 using GridPuzzle.Audio;
 using GridPuzzle.Config;
+using GridPuzzle.Haptics;
 using GridPuzzle.Input;
 using GridPuzzle.UI;
 using GridPuzzle.View;
@@ -12,7 +13,8 @@ namespace GridPuzzle.Core
     /// <summary>
     /// Master coordinator orchestrating the complete mobile game loop.
     /// Mediates data flow across pure C# model (GridPuzzleGame), input pipeline (SwipeInputDetector),
-    /// visual rendering (GridBoardView), presentation UI (GridPuzzleUIManager), and sound (PuzzleAudioManager).
+    /// visual rendering (GridBoardView), presentation UI (GridPuzzleUIManager), sound (PuzzleAudioManager),
+    /// and tactile feedback (PuzzleHapticManager).
     /// </summary>
     public class GridPuzzleGameController : MonoBehaviour
     {
@@ -21,6 +23,7 @@ namespace GridPuzzle.Core
         [SerializeField] private GridPuzzleUIManager uiManager;
         [SerializeField] private SwipeInputDetector swipeInput;
         [SerializeField] private PuzzleAudioManager audioManager;
+        [SerializeField] private PuzzleHapticManager hapticManager;
         [SerializeField] private GridPuzzleConfig config;
 
         [Header("Tactical Power-Ups Available")]
@@ -83,6 +86,11 @@ namespace GridPuzzle.Core
             {
                 boardView.Initialize(config, rows, cols);
                 boardView.OnCellClicked += HandleCellClicked;
+            }
+
+            if (hapticManager == null)
+            {
+                hapticManager = GetComponent<PuzzleHapticManager>() ?? gameObject.AddComponent<PuzzleHapticManager>();
             }
 
             RestartGame();
@@ -164,25 +172,28 @@ namespace GridPuzzle.Core
                 return;
             }
 
-            // Audio feedback
-            if (audioManager != null)
+            // Audio & Haptic feedback
+            if (audioManager != null) audioManager.PlaySwipe();
+            if (hapticManager != null) hapticManager.TriggerSwipe();
+
+            if (moveResult.MergesCount > 0)
             {
-                if (moveResult.MergesCount > 0)
-                {
-                    int maxVal = moveResult.Motions.Where(m => m.IsMerge).Select(m => m.PromotedValue).DefaultIfEmpty(4).Max();
-                    audioManager.PlayMerge(maxVal);
-                }
+                int maxVal = moveResult.Motions.Where(m => m.IsMerge).Select(m => m.PromotedValue).DefaultIfEmpty(4).Max();
+                if (audioManager != null) audioManager.PlayMerge(maxVal);
+                if (hapticManager != null) hapticManager.TriggerMerge(maxVal);
+            }
 
-                if (moveResult.ObstacleDamages.Count > 0)
-                {
-                    bool shattered = moveResult.ObstacleDamages.Any(o => o.Shattered);
-                    audioManager.PlayIceDamage(shattered);
-                }
+            if (moveResult.ObstacleDamages.Count > 0)
+            {
+                bool shattered = moveResult.ObstacleDamages.Any(o => o.Shattered);
+                if (audioManager != null) audioManager.PlayIceDamage(shattered);
+                if (hapticManager != null) hapticManager.TriggerIceDamage(shattered);
+            }
 
-                if (moveResult.ComboCount > 1)
-                {
-                    audioManager.PlayCombo(moveResult.ComboCount);
-                }
+            if (moveResult.ComboCount > 1)
+            {
+                if (audioManager != null) audioManager.PlayCombo(moveResult.ComboCount);
+                if (hapticManager != null) hapticManager.TriggerCombo(moveResult.ComboCount);
             }
 
             // Visual animation sequencing
@@ -215,6 +226,7 @@ namespace GridPuzzle.Core
 
             if (swipeInput != null) swipeInput.IsInputBlocked = true;
             if (audioManager != null) audioManager.PlayButtonClick();
+            if (hapticManager != null) hapticManager.TriggerButtonClick();
 
             bool undone = GameLogic.TryUndo(out var undoResult);
 
@@ -260,6 +272,7 @@ namespace GridPuzzle.Core
             if (uiManager != null) uiManager.SetBombSelected(true);
             if (swipeInput != null) swipeInput.IsInputBlocked = true;
             if (audioManager != null) audioManager.PlayButtonClick();
+            if (hapticManager != null) hapticManager.TriggerSelection();
         }
 
         private void HandleShuffleClicked()
@@ -278,6 +291,7 @@ namespace GridPuzzle.Core
             if (uiManager != null) uiManager.SetSwapSelected(true);
             if (swipeInput != null) swipeInput.IsInputBlocked = true;
             if (audioManager != null) audioManager.PlayButtonClick();
+            if (hapticManager != null) hapticManager.TriggerSelection();
         }
 
         private void HandleCellClicked(GridPosition clickedPos)
@@ -293,6 +307,7 @@ namespace GridPuzzle.Core
                 {
                     bombCharges--;
                     if (audioManager != null) audioManager.PlayPowerUp();
+                    if (hapticManager != null) hapticManager.TriggerBomb();
                     if (uiManager != null) uiManager.UpdatePowerUpCounts(bombCharges, shuffleCharges);
 
                     CancelActivePowerUp();
@@ -325,6 +340,7 @@ namespace GridPuzzle.Core
                     _selectedSwapTilePos = clickedPos;
                     if (boardView != null) boardView.SetTileSelected(clickedPos, true);
                     if (audioManager != null) audioManager.PlayButtonClick();
+                    if (hapticManager != null) hapticManager.TriggerSelection();
                 }
                 else
                 {
@@ -337,6 +353,7 @@ namespace GridPuzzle.Core
                         if (boardView != null) boardView.SetTileSelected(firstPos, false);
                         _selectedSwapTilePos = null;
                         if (audioManager != null) audioManager.PlayButtonClick();
+                        if (hapticManager != null) hapticManager.TriggerSelection();
                         return;
                     }
 
@@ -347,6 +364,7 @@ namespace GridPuzzle.Core
                         _selectedSwapTilePos = null;
 
                         if (audioManager != null) audioManager.PlayPowerUp();
+                        if (hapticManager != null) hapticManager.TriggerSwap();
                         if (uiManager != null) uiManager.UpdatePowerUpCounts(bombCharges, shuffleCharges);
 
                         CancelActivePowerUp();
@@ -415,10 +433,15 @@ namespace GridPuzzle.Core
                 swipeInput.IsInputBlocked = true;
             }
 
-            if (audioManager != null)
+            if (state == GameState.Won)
             {
-                if (state == GameState.Won) audioManager.PlayWin();
-                else if (state == GameState.GameOver) audioManager.PlayGameOver();
+                if (audioManager != null) audioManager.PlayWin();
+                if (hapticManager != null) hapticManager.TriggerWin();
+            }
+            else if (state == GameState.GameOver)
+            {
+                if (audioManager != null) audioManager.PlayGameOver();
+                if (hapticManager != null) hapticManager.TriggerGameOver();
             }
         }
     }
