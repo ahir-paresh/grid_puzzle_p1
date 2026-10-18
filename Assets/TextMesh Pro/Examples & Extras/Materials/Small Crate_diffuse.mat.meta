@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 22262639920f43d6be32430e4e58350d
+timeCreated: 1473643741
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Materials/Small Crate_diffuse.mat
+  uploadId: 678909

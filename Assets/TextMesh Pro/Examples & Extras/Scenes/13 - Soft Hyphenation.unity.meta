@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 875684baf40f4d008ce806d03e2a81b2
+timeCreated: 1487545080
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/13 - Soft Hyphenation.unity
+  uploadId: 678909

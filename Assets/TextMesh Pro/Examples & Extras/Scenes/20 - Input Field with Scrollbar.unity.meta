@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 337f92480dd24675aae9e79210fb1ad9
+timeCreated: 1487199155
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/20 - Input Field with Scrollbar.unity
+  uploadId: 678909

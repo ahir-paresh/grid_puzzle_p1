@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 22a2fba786ad4c40ac0ba09f0b933100
+timeCreated: 1488062344
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/14 - Multi Font & Sprites.unity
+  uploadId: 678909

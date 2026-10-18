@@ -1,0 +1,31 @@
+fileFormatVersion: 2
+guid: 70615243e2be4a81afaab9bf5d273d65
+labels:
+- Mesh
+- Text
+- Rendering
+- TextMesh
+- TextMeshPro
+- Font
+- Dynamic
+- Pro
+- Fonts
+- Advanced
+- GUI
+- Scene
+- Styles
+- Style
+- Layout
+- Atlas
+- Kerning
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/05 - Style Tags.unity
+  uploadId: 678909

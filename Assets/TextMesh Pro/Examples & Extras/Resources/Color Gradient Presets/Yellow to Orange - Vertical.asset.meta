@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 69a525efa7e6472eab268f6ea605f06e
+timeCreated: 1468213165
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Resources/Color Gradient Presets/Yellow
+    to Orange - Vertical.asset
+  uploadId: 678909

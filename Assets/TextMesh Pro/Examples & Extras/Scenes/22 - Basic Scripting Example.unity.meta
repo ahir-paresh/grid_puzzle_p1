@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6250f98e58fe4abbaada5d84b7ca846d
+timeCreated: 1449626883
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/22 - Basic Scripting Example.unity
+  uploadId: 678909

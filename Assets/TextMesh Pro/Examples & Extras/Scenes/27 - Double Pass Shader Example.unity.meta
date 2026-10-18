@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3b38a6ba32b869f48812e595baf39746
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/27 - Double Pass Shader
+    Example.unity
+  uploadId: 678909

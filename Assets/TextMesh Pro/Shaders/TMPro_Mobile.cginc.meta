@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: c334973cef89a9840b0b0c507e0377ab
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Shaders/TMPro_Mobile.cginc
+  uploadId: 678909

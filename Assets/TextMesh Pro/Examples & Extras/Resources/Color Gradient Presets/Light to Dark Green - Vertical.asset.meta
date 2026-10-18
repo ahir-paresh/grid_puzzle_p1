@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 5cf8ae092ca54931b443bec5148f3c59
+timeCreated: 1468443381
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Resources/Color Gradient Presets/Light
+    to Dark Green - Vertical.asset
+  uploadId: 678909

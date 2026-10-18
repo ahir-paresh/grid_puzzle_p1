@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0251f66ebc602a944b35bccd13be2738
+timeCreated: 1484171296
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Fonts/Unity - OFL.txt
+  uploadId: 678909

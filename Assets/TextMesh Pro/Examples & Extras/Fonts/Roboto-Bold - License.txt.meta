@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f0303f887b8fa7243a51432c478ff2f3
+timeCreated: 1484171296
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Fonts/Roboto-Bold - License.txt
+  uploadId: 678909

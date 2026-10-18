@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 9442cda25baa4a0bb544c4d095b00caa
+timeCreated: 1480388889
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/16 - Linked text overflow
+    mode example.unity
+  uploadId: 678909

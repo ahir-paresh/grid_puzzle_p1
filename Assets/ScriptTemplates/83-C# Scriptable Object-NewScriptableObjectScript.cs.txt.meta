@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9e222d22392995f44981c5ee22a4adb8
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/ScriptTemplates/83-C# Scriptable Object-NewScriptableObjectScript.cs.txt
+  uploadId: 678909

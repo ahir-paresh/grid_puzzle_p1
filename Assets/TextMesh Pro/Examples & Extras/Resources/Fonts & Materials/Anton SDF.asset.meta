@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 8a89fa14b10d46a99122fd4f73fca9a2
+timeCreated: 1484172732
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Anton
+    SDF.asset
+  uploadId: 678909

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: efe0bf4ac872451e91612d1ae593f480
+timeCreated: 1484171296
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Fonts/Bangers - OFL.txt
+  uploadId: 678909

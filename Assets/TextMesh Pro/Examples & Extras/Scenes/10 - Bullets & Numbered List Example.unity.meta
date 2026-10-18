@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: c3f814e1d12c45568daf3dd9a86a0e61
+timeCreated: 1464165314
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/10 - Bullets & Numbered
+    List Example.unity
+  uploadId: 678909

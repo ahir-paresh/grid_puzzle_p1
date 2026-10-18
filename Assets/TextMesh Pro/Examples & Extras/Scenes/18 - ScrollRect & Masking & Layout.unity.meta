@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 03f9d74cec8e4b94a29d2dfd177c821b
+timeCreated: 1445416487
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/18 - ScrollRect & Masking
+    & Layout.unity
+  uploadId: 678909

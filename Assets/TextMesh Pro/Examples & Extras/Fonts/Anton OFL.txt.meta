@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 73a79399807f4e8388c2cbb5494681ca
+timeCreated: 1484172033
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Fonts/Anton OFL.txt
+  uploadId: 678909

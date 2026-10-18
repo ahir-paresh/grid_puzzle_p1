@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 14aa93acbb234d16aaef0e8b46814db6
+timeCreated: 1464163339
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Resources/Sprite Assets/DropCap
+    Numbers.asset
+  uploadId: 678909

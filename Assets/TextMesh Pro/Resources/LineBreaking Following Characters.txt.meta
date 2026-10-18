@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fade42e8bc714b018fac513c043d323b
+timeCreated: 1425440388
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Resources/LineBreaking Following Characters.txt
+  uploadId: 678909

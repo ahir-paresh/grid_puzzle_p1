@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 54e994244b4b467e8583cf2da6dcc716
+timeCreated: 1461311052
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scenes/23 - Animating Vertex Attributes.unity
+  uploadId: 678909

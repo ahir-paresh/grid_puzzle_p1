@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 8ef7be1c625941f7ba8ed7cc71718c0d
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289616
+  packageName: Level up your code with design patterns and SOLID
+  packageVersion: 1.1
+  assetPath: Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01_UGUI.cs
+  uploadId: 678909
