@@ -76,3 +76,11 @@ crashlytics-build.properties
 *.DS_Store
 .DS_Store
 *.slnx
+
+
+# macOS
+.DS_Store
+
+# .NET generated files
+**/obj/
+**/bin/
